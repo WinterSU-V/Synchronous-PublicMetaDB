@@ -169,6 +169,60 @@ which has known reliability problems on Linux (both Firefox and
 Chromium-based browsers, particularly under Wayland). The ▲▼ buttons
 remain as a fully independent fallback.
 
+## Publishing to GitHub
+
+A git repo is already initialized in this folder with everything except
+`node_modules/` and `.cache/` (see `.gitignore`) committed. To push it:
+
+```bash
+# Create an empty repo on GitHub first (no README/license — this already has one), then:
+git remote add origin https://github.com/YOUR-USERNAME/pmdb-stremio-addon.git
+git branch -M main
+git push -u origin main
+```
+
+Two placeholders need your real repo URL once it exists — search for
+`YOUR-USERNAME` and replace it in both:
+- `package.json` (`repository.url`)
+- `public/configure.html` (the "View source on GitHub" links, in both the
+  connect screen and dashboard footers)
+
+**Before pushing anywhere public:** your PMDB and TMDB API keys are not
+in this repo (they only ever live in a browser-generated install URL or an
+encrypted export file), so the *code* is safe to publish. The install
+URL itself, though, is not — it's your keys in a base64 wrapper, not
+encrypted. Treat a generated manifest URL like a password: don't post it
+publicly, and don't commit one into the repo.
+
+## Hosting
+
+Running `npm start` locally is enough for personal use as long as Stremio
+runs on the same machine. To use it from other devices, it needs a public
+URL. Free tiers for *always-on* Node hosting have gotten scarcer — Heroku
+and Glitch both dropped theirs — and the ones that remain come with a
+tradeoff worth knowing for this specific app:
+
+- **Render's free web service** is the easiest to wire up (GitHub
+  integration, auto-deploy on push), but free instances spin down after
+  inactivity and take 30-60 seconds to wake on the next request. Since
+  Stremio itself times out slow catalog responses (see the notes above on
+  Home-screen loading), a cold start could reintroduce exactly the
+  "doesn't load, works on retry" symptom we spent this whole conversation
+  fixing — the first request after any idle period would likely be too
+  slow. Free tier disk is also ephemeral, so the on-disk TMDB cache resets
+  on every redeploy or restart.
+- **Fly.io** has historically offered a small always-on free allowance
+  with persistent volume support, which fits this app's needs (staying
+  warm, keeping the disk cache) better than a spin-down model — but check
+  their current terms directly, since free-tier offerings change often.
+- **A small VPS** (several providers run $4-6/month for ~512MB-1GB RAM)
+  sidesteps the cold-start risk entirely and is the most predictable
+  option if this needs to be reliably available — not free, but cheap and
+  removes the exact failure mode this app is sensitive to.
+
+Whichever you pick, double-check their current free-tier terms yourself
+before committing — this landscape shifts fairly often.
+
 ## Icon & versioning
 
 The addon manifest now includes a logo (`public/icon.png`) — a sync symbol
