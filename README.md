@@ -211,9 +211,19 @@ tradeoff worth knowing for this specific app:
   fixing — the first request after any idle period would likely be too
   slow. Free tier disk is also ephemeral, so the on-disk TMDB cache resets
   on every redeploy or restart.
-- **Fly.io and Railway** have both moved to trial/usage-based pricing as
-  of 2026 — neither is a true always-free platform anymore, despite older
-  advice (including earlier in this README) suggesting otherwise.
+- **Fly.io** moved off a true always-free tier, but its paid entry price
+  is still low: `shared-cpu-1x` (256MB RAM) runs about $2.02/month
+  continuously running, 512MB about $3.32/month, per Fly's own pricing
+  docs. Persistent volumes (for the on-disk TMDB cache) are billed
+  separately at $0.15/GB/month — a small volume for this app's cache adds
+  well under $1/month. All-in, that lands in the same price bracket as
+  Scaleway/Cloudzy below, while giving you `flyctl deploy`-style tooling
+  (deploy from a Dockerfile) instead of a bare VPS you configure by hand.
+  As with anything usage-based, confirm current rates before committing —
+  this page originally said Fly.io "wasn't worth comparing" once its free
+  tier ended, which undersold it; the corrected comparison is above.
+  (Railway followed a similar path — usage-based/trial pricing now,
+  worth checking directly if you're considering it too.)
 - **A cheap always-on VPS** sidesteps the cold-start risk entirely and is
   the most predictable option if reliability matters. This is a plain
   Linux box, not a PaaS — no git-push-to-deploy, you run `npm start`
