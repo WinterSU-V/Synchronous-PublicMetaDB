@@ -211,17 +211,31 @@ tradeoff worth knowing for this specific app:
   fixing — the first request after any idle period would likely be too
   slow. Free tier disk is also ephemeral, so the on-disk TMDB cache resets
   on every redeploy or restart.
-- **Fly.io** has historically offered a small always-on free allowance
-  with persistent volume support, which fits this app's needs (staying
-  warm, keeping the disk cache) better than a spin-down model — but check
-  their current terms directly, since free-tier offerings change often.
-- **A small VPS** (several providers run $4-6/month for ~512MB-1GB RAM)
-  sidesteps the cold-start risk entirely and is the most predictable
-  option if this needs to be reliably available — not free, but cheap and
-  removes the exact failure mode this app is sensitive to.
+- **Fly.io and Railway** have both moved to trial/usage-based pricing as
+  of 2026 — neither is a true always-free platform anymore, despite older
+  advice (including earlier in this README) suggesting otherwise.
+- **A cheap always-on VPS** sidesteps the cold-start risk entirely and is
+  the most predictable option if reliability matters. This is a plain
+  Linux box, not a PaaS — no git-push-to-deploy, you run `npm start`
+  yourself (or as a systemd service / inside `screen`/`tmux`) — but it
+  removes the exact failure mode this app is sensitive to, and it's cheap:
+  **Scaleway**'s entry tier runs about €1.80-2/month (1 vCPU, 1GB RAM,
+  10GB disk); **Cloudzy** starts around $2.48-3.48/month, similar specs.
+  Both are full-root, always-on, with real persistent disk.
+- **Vercel is a poor fit here specifically**, not just cold-start-prone
+  like Render. It runs serverless functions — stateless, and not
+  guaranteed to share memory between invocations. This app relies on
+  shared in-process state across concurrent requests (the TMDB pacer, the
+  request-coalescing cache, the disk-persisted TMDB cache); on Vercel,
+  concurrent requests can land on separate isolated instances that don't
+  share any of that, which would quietly reintroduce the rate-limiting
+  bug already fixed. Workable in principle by moving that state to
+  something like Redis, but that's a real architecture change, not a
+  deploy setting.
 
-Whichever you pick, double-check their current free-tier terms yourself
-before committing — this landscape shifts fairly often.
+Whichever you pick, double-check their current terms yourself before
+committing — this landscape shifts often enough that advice above can go
+stale within the same year it's written.
 
 ## Icon & versioning
 
