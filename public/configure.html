@@ -1,0 +1,1247 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Synchronous: PublicMetaDB — Addon Setup</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    color-scheme: dark;
+    --bg: #14120f;
+    --surface: #1d1a15;
+    --surface-raised: #262119;
+    --line: #332d23;
+    --amber: #e8a33d;
+    --amber-dim: #b17d2d;
+    --marquee-red: #c1443c;
+    --green: #7fb069;
+    --text: #f2ede2;
+    --text-muted: #93897a;
+    --mono: 'JetBrains Mono', ui-monospace, monospace;
+    --display: 'Barlow Condensed', sans-serif;
+    --body-font: 'Inter', -apple-system, system-ui, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    background-image:
+      radial-gradient(ellipse 600px 300px at 50% -10%, rgba(232,163,61,0.10), transparent);
+    color: var(--text);
+    font-family: var(--body-font);
+    max-width: 680px;
+    margin: 0 auto;
+    padding: 40px 20px 100px;
+    line-height: 1.5;
+  }
+
+  .eyebrow {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+    color: var(--amber);
+    text-transform: uppercase;
+    margin: 0 0 10px;
+  }
+
+  h1 {
+    font-family: var(--display);
+    font-weight: 700;
+    font-size: clamp(1.9rem, 7vw, 2.6rem);
+    line-height: 0.95;
+    letter-spacing: -0.01em;
+    margin: 0 0 8px;
+  }
+
+  p.sub {
+    color: var(--text-muted);
+    margin: 0 0 36px;
+    font-size: 1rem;
+    max-width: 46ch;
+  }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    padding: 22px 0 16px;
+    border-top: 1px solid var(--line);
+  }
+  #connectScreen .section:first-of-type .section-head { border-top: none; padding-top: 0; }
+
+  .section-num {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--amber-dim);
+  }
+
+  .section-title {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.3rem;
+    letter-spacing: 0.01em;
+  }
+
+  .section-desc {
+    color: var(--text-muted);
+    font-size: 0.88rem;
+    margin: 0 0 18px;
+  }
+
+  label {
+    display: block;
+    margin: 16px 0 6px;
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  label:first-of-type { margin-top: 0; }
+
+  input[type=text], input[type=password] {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: var(--surface);
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 0.92rem;
+    transition: border-color 0.15s ease, background 0.15s ease;
+  }
+  input[type=text]:focus, input[type=password]:focus {
+    outline: none;
+    border-color: var(--amber);
+    background: var(--surface-raised);
+  }
+
+  .hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 6px;
+  }
+
+  button {
+    font-family: var(--body-font);
+    padding: 12px 20px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: var(--amber);
+    color: #1a1408;
+    font-size: 0.92rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: filter 0.15s ease, transform 0.1s ease;
+  }
+  button:hover:not(:disabled) { filter: brightness(1.08); }
+  button:active:not(:disabled) { transform: scale(0.98); }
+  button:disabled { opacity: 0.4; cursor: default; }
+
+  button.secondary {
+    background: transparent;
+    border-color: var(--line);
+    color: var(--text);
+  }
+  button.text {
+    background: none;
+    border: none;
+    color: var(--amber);
+    padding: 8px 0;
+  }
+
+  .row-buttons { display: flex; gap: 10px; align-items: center; margin-top: 20px; flex-wrap: wrap; }
+
+  .error {
+    color: var(--marquee-red);
+    font-size: 0.85rem;
+    margin-top: 10px;
+    min-height: 1em;
+  }
+
+  /* ---------- Dashboard shell ---------- */
+  .dash-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .dash-header h1 { margin-bottom: 4px; }
+  .dash-header p.sub { margin-bottom: 24px; }
+
+  .cog-wrap { position: relative; flex-shrink: 0; }
+  .icon-btn {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--text);
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    font-size: 1.15rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+  }
+  .icon-btn:hover { background: var(--surface-raised); }
+
+  .menu {
+    position: absolute;
+    right: 0;
+    top: calc(100% + 8px);
+    background: var(--surface-raised);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    min-width: 190px;
+    padding: 6px;
+    z-index: 20;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: 6px;
+    font-size: 0.88rem;
+    font-weight: 500;
+  }
+  .menu button:hover { background: var(--surface); }
+  .menu button.danger { color: var(--marquee-red); }
+
+  .tabs {
+    display: flex;
+    gap: 4px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+  .tab-btn {
+    background: none;
+    border: none;
+    color: var(--text-muted);
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    padding: 10px 4px;
+    margin-right: 22px;
+    border-radius: 0;
+    border-bottom: 2px solid transparent;
+    position: relative;
+    top: 1px;
+  }
+  .tab-btn.active { color: var(--amber); border-bottom-color: var(--amber); }
+  .tab-btn:hover:not(.active) { color: var(--text); }
+
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  /* ---------- Lists tab: cards ---------- */
+  .list-card {
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    margin-bottom: 12px;
+    overflow: hidden;
+  }
+  .list-card-head {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 14px 16px;
+    cursor: pointer;
+  }
+  .list-card-name {
+    font-weight: 600;
+    font-size: 0.98rem;
+    flex: 1;
+  }
+  .list-card-count {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+  .list-card-chevron {
+    color: var(--text-muted);
+    transition: transform 0.15s ease;
+    font-size: 0.8rem;
+  }
+  .list-card.expanded .list-card-chevron { transform: rotate(90deg); }
+
+  .poster-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 16px;
+    overflow-x: auto;
+  }
+  .poster-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+    gap: 10px;
+    padding: 0 16px 16px;
+  }
+  .poster {
+    aspect-ratio: 2 / 3;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--surface-raised);
+    flex-shrink: 0;
+    width: 72px;
+  }
+  .poster-grid .poster { width: auto; }
+  .poster img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
+  .card-loading, .card-empty {
+    padding: 0 16px 16px;
+    font-size: 0.82rem;
+    color: var(--text-muted);
+    font-family: var(--mono);
+  }
+  .card-empty .retry-btn {
+    margin-left: 8px;
+    padding: 0;
+    font-size: 0.82rem;
+    text-decoration: underline;
+  }
+
+  /* ---------- Configuration tab: reorderable rows ---------- */
+  .catalog-list {
+    margin-top: 4px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--line);
+  }
+
+  .catalog-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--line);
+    position: relative;
+  }
+  .catalog-item:last-child { border-bottom: none; }
+  .catalog-item.dragging { opacity: 0.4; background: var(--surface-raised); }
+  .catalog-item.unchecked .catalog-name { color: var(--text-muted); }
+
+  .pos {
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--amber-dim);
+    width: 1.6em;
+    text-align: right;
+    flex-shrink: 0;
+  }
+
+  .handle {
+    cursor: grab;
+    color: var(--text-muted);
+    font-size: 1.1rem;
+    letter-spacing: -2px;
+    user-select: none;
+    flex-shrink: 0;
+    padding: 4px;
+    touch-action: none;
+  }
+  .handle:active { cursor: grabbing; }
+
+  .catalog-item input[type=checkbox] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--amber);
+    flex-shrink: 0;
+  }
+
+  .catalog-name {
+    flex: 1;
+    font-size: 0.95rem;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .order-btns {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex-shrink: 0;
+  }
+  .order-btns button {
+    all: unset;
+    cursor: pointer;
+    color: var(--text-muted);
+    font-size: 0.7rem;
+    line-height: 1;
+    padding: 3px 5px;
+    border-radius: 4px;
+  }
+  .order-btns button:hover { background: var(--surface-raised); color: var(--text); }
+  .order-btns button:disabled { opacity: 0.25; cursor: default; }
+  .order-btns button:disabled:hover { background: none; }
+
+  .reorder-hint {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    margin-top: 10px;
+  }
+
+  #generateBtn { margin-top: 24px; }
+
+  .result {
+    margin-top: 20px;
+    padding: 18px;
+    background: var(--surface);
+    border: 1px solid var(--amber-dim);
+    border-radius: 12px;
+    display: none;
+    animation: rise 0.25s ease;
+  }
+  @keyframes rise {
+    from { opacity: 0; transform: translateY(6px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .result strong {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.05rem;
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  .result code {
+    display: block;
+    word-break: break-all;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    padding: 12px;
+    border-radius: 8px;
+    font-family: var(--mono);
+    font-size: 0.78rem;
+    color: var(--amber);
+    margin-bottom: 12px;
+  }
+
+  /* ---------- Dialog (passphrase prompt) ---------- */
+  dialog {
+    background: var(--surface-raised);
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px;
+    max-width: 400px;
+    width: calc(100% - 40px);
+    font-family: var(--body-font);
+  }
+  dialog::backdrop { background: rgba(10,9,7,0.7); }
+  dialog h2 {
+    font-family: var(--display);
+    font-weight: 600;
+    font-size: 1.3rem;
+    margin: 0 0 6px;
+  }
+  dialog p.dialog-desc {
+    color: var(--text-muted);
+    font-size: 0.85rem;
+    margin: 0 0 18px;
+  }
+  dialog .row-buttons { margin-top: 22px; justify-content: flex-end; }
+
+  .checkbox-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    margin-bottom: 18px;
+  }
+  .checkbox-row input[type=checkbox] {
+    width: 17px;
+    height: 17px;
+    accent-color: var(--amber);
+    flex-shrink: 0;
+    margin: 0;
+  }
+  .checkbox-label {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text);
+    text-transform: none;
+    letter-spacing: normal;
+    margin: 0;
+  }
+
+  .warn-box {
+    background: rgba(193,68,60,0.1);
+    border: 1px solid rgba(193,68,60,0.35);
+    color: #e79891;
+    font-size: 0.8rem;
+    padding: 10px 12px;
+    border-radius: 8px;
+    margin-top: 14px;
+  }
+
+  .page-footer {
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .page-footer a {
+    color: var(--text-muted);
+    font-size: 0.82rem;
+    text-decoration: none;
+  }
+  .page-footer a:hover { color: var(--amber); }
+  .footer-version {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    opacity: 0.7;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; }
+  }
+</style>
+</head>
+<body>
+
+  <!-- ======================= CONNECT SCREEN ======================= -->
+  <div id="connectScreen">
+    <p class="eyebrow">Stremio Addon · Setup</p>
+    <h1>Synchronous: PublicMetaDB</h1>
+    <p class="sub">Connect your account, then choose what shows up in Stremio — and in what order.</p>
+
+    <div class="section">
+      <div class="section-head">
+        <span class="section-num">01</span>
+        <span class="section-title">Connect</span>
+      </div>
+
+      <label for="pmdbKey">PublicMetaDB API key</label>
+      <input type="password" id="pmdbKey" placeholder="pm-..." autocomplete="off" />
+      <p class="hint">Settings → API on publicmetadb.com</p>
+
+      <label for="tmdbKey">TMDB API key</label>
+      <input type="password" id="tmdbKey" placeholder="v3 auth key" autocomplete="off" />
+      <p class="hint">Fills in titles &amp; posters — PMDB only gives us IDs.</p>
+
+      <div class="row-buttons">
+        <button id="loadListsBtn">Load my lists</button>
+        <button class="secondary" id="importBtn" type="button">Import keys from file…</button>
+      </div>
+      <div class="error" id="connectError"></div>
+    </div>
+
+    <footer class="page-footer">
+      <a href="https://github.com/YOUR-USERNAME/pmdb-stremio-addon" target="_blank" rel="noopener">View source on GitHub</a>
+      <span class="footer-version">v1.2.1</span>
+    </footer>
+  </div>
+
+  <!-- ========================== DASHBOARD ========================== -->
+  <div id="dashboard" style="display:none;">
+    <header class="dash-header">
+      <div class="dash-title">
+        <p class="eyebrow">Stremio Addon</p>
+        <h1>Synchronous: PublicMetaDB</h1>
+        <p class="sub">Browse what's in each list, then configure what Stremio shows.</p>
+      </div>
+      <div class="cog-wrap">
+        <button class="icon-btn" id="cogBtn" aria-label="Settings" aria-haspopup="true">⚙</button>
+        <div class="menu" id="cogMenu" hidden>
+          <button type="button" data-action="export">Export keys…</button>
+          <button type="button" data-action="signout" class="danger">Sign out</button>
+        </div>
+      </div>
+    </header>
+
+    <nav class="tabs">
+      <button class="tab-btn active" data-tab="lists">Lists</button>
+      <button class="tab-btn" data-tab="config">Configuration</button>
+    </nav>
+
+    <section class="panel active" id="panel-lists">
+      <div id="listCards"></div>
+    </section>
+
+    <section class="panel" id="panel-config">
+      <p class="section-desc">This is the running order Stremio will use. Drag the handle, or use the arrows, to rearrange. Only checked rows are added.</p>
+      <div class="catalog-list" id="catalogList"></div>
+      <button id="generateBtn">Generate install link</button>
+      <div class="error" id="configError"></div>
+
+      <div class="result" id="result">
+        <strong>Manifest URL</strong>
+        <code id="manifestUrl"></code>
+        <button class="secondary" id="copyBtn" type="button">Copy URL</button>
+        <p class="hint" style="margin-top:14px;">Paste this into Stremio → Addons → search bar. (The stremio:// deep link is unreliable for local addresses, so manual paste is the reliable path.)</p>
+      </div>
+    </section>
+
+    <footer class="page-footer">
+      <a href="https://github.com/YOUR-USERNAME/pmdb-stremio-addon" target="_blank" rel="noopener">View source on GitHub</a>
+      <span class="footer-version">v1.2.1</span>
+    </footer>
+  </div>
+
+  <!-- ======================= PASSPHRASE DIALOG ======================= -->
+  <dialog id="passDialog">
+    <form method="dialog" id="passForm">
+      <h2 id="passDialogTitle">Export keys</h2>
+      <p class="dialog-desc" id="passDialogDesc">
+        Choose a passphrase to encrypt the file. You'll need it again to import.
+      </p>
+
+      <div id="includeListsWrap" class="checkbox-row">
+        <input type="checkbox" id="includeListsCheckbox" checked />
+        <label for="includeListsCheckbox" class="checkbox-label">Also include my list selection &amp; order</label>
+      </div>
+
+      <label for="pass1" id="pass1Label">Passphrase</label>
+      <input type="password" id="pass1" autocomplete="off" />
+
+      <div id="pass2Wrap">
+        <label for="pass2">Confirm passphrase</label>
+        <input type="password" id="pass2" autocomplete="off" />
+      </div>
+
+      <div class="error" id="passError"></div>
+      <div class="warn-box" id="passWarn" hidden>
+        There's no recovery if you forget this passphrase — the file can't be decrypted without it.
+      </div>
+
+      <div class="row-buttons">
+        <button type="button" class="secondary" id="passCancelBtn">Cancel</button>
+        <button type="submit" id="passSubmitBtn">Continue</button>
+      </div>
+    </form>
+  </dialog>
+
+  <!-- ======================= IMPORT CONFIRMATION DIALOG ======================= -->
+  <dialog id="importInfoDialog">
+    <h2>Import keys</h2>
+    <p class="dialog-desc">
+      Importing requires a file you've already exported. Set up your PMDB and
+      TMDB keys here first, then use <strong>Export keys…</strong> in the
+      Settings menu (⚙) once you're logged in — that file is what you'll
+      import here, on this or another device.
+    </p>
+    <div class="row-buttons">
+      <button type="button" class="secondary" id="importInfoCancelBtn">Cancel</button>
+      <button type="button" id="importInfoContinueBtn">Continue</button>
+    </div>
+  </dialog>
+
+  <input type="file" id="importFileInput" accept=".pmdbkeys,.json,application/json" hidden />
+
+<script>
+/* ======================= State ======================= */
+let keys = { pmdbKey: '', tmdbKey: '' };
+let items = []; // { id, name, listId?, checked }
+// sourceId -> { items: [], total: 0, loaded: bool, loading: bool, expanded: bool, error: string|null }
+const previewCache = {};
+const PREVIEW_LIMIT = 60; // fetched once per list, up front — covers the collapsed thumbnails and most expanded views
+
+/* ======================= Networking ======================= */
+// Every fetch in this page goes through here so a dropped connection or a
+// slow response fails loudly (visible error message) instead of silently —
+// a bare fetch() with no catch just disappears into an unhandled rejection.
+async function fetchJson(url, options = {}, timeoutMs = 15000) {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  let res;
+  try {
+    res = await fetch(url, { ...options, signal: controller.signal });
+  } catch (e) {
+    if (e.name === 'AbortError') {
+      throw new Error('Request timed out — check your connection and try again.');
+    }
+    throw new Error('Network error — check your connection and try again.');
+  } finally {
+    clearTimeout(timer);
+  }
+
+  let data = null;
+  try { data = await res.json(); } catch (e) { /* non-JSON or empty body */ }
+
+  if (!res.ok) {
+    throw new Error((data && data.error) || `Request failed (${res.status})`);
+  }
+  return data;
+}
+
+/* ======================= Crypto (export/import) ======================= */
+const KEYFILE_FORMAT = 'pmdb-addon-keyfile';
+const KEYFILE_VERSION = 2; // v2 adds `catalogs` (list selection + order) alongside keys; v1 files (keys only) still import fine
+const PBKDF2_ITERATIONS = 210000;
+
+function bufToB64(buf) {
+  return btoa(String.fromCharCode(...new Uint8Array(buf)));
+}
+function b64ToBuf(b64) {
+  return Uint8Array.from(atob(b64), c => c.charCodeAt(0));
+}
+
+async function deriveKey(passphrase, salt, usage) {
+  const enc = new TextEncoder();
+  const baseKey = await crypto.subtle.importKey('raw', enc.encode(passphrase), 'PBKDF2', false, ['deriveKey']);
+  return crypto.subtle.deriveKey(
+    { name: 'PBKDF2', salt, iterations: PBKDF2_ITERATIONS, hash: 'SHA-256' },
+    baseKey,
+    { name: 'AES-GCM', length: 256 },
+    false,
+    [usage]
+  );
+}
+
+// `catalogs` is optional — pass null/undefined to export keys only.
+async function encryptKeysToFile(pmdbKey, tmdbKey, catalogs, passphrase) {
+  const enc = new TextEncoder();
+  const salt = crypto.getRandomValues(new Uint8Array(16));
+  const iv = crypto.getRandomValues(new Uint8Array(12));
+  const key = await deriveKey(passphrase, salt, 'encrypt');
+  const payload = catalogs ? { pmdbKey, tmdbKey, catalogs } : { pmdbKey, tmdbKey };
+  const plaintext = enc.encode(JSON.stringify(payload));
+  const ciphertext = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, plaintext);
+
+  return JSON.stringify({
+    format: KEYFILE_FORMAT,
+    version: KEYFILE_VERSION,
+    kdf: 'PBKDF2-SHA256',
+    iterations: PBKDF2_ITERATIONS,
+    salt: bufToB64(salt),
+    iv: bufToB64(iv),
+    ciphertext: bufToB64(ciphertext)
+  }, null, 2);
+}
+
+// Returns { pmdbKey, tmdbKey, catalogs? } — catalogs is only present if the
+// file was exported with "include lists" checked (or is a v2+ file that had them).
+async function decryptKeysFromFile(fileText, passphrase) {
+  let payload;
+  try {
+    payload = JSON.parse(fileText);
+  } catch (e) {
+    throw new Error('Not a valid key file.');
+  }
+  if (payload.format !== KEYFILE_FORMAT) throw new Error('Not a PublicMetaDB key file.');
+
+  const salt = b64ToBuf(payload.salt);
+  const iv = b64ToBuf(payload.iv);
+  const ciphertext = b64ToBuf(payload.ciphertext);
+  const key = await deriveKey(passphrase, salt, 'decrypt');
+
+  let plaintext;
+  try {
+    plaintext = await crypto.subtle.decrypt({ name: 'AES-GCM', iv }, key, ciphertext);
+  } catch (e) {
+    throw new Error('Wrong passphrase, or the file is corrupted.');
+  }
+
+  const dec = new TextDecoder();
+  return JSON.parse(dec.decode(plaintext));
+}
+
+function downloadTextFile(filename, text) {
+  const blob = new Blob([text], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
+/* ======================= Passphrase dialog ======================= */
+const passDialog = document.getElementById('passDialog');
+const passForm = document.getElementById('passForm');
+
+function openPassphraseDialog(mode) {
+  document.getElementById('pass1').value = '';
+  document.getElementById('pass2').value = '';
+  document.getElementById('passError').textContent = '';
+  document.getElementById('includeListsCheckbox').checked = true;
+
+  const isExport = mode === 'export';
+  document.getElementById('passDialogTitle').textContent = isExport ? 'Export keys' : 'Import keys';
+  document.getElementById('passDialogDesc').textContent = isExport
+    ? "Choose a passphrase to encrypt the file. You'll need it again to import."
+    : 'Enter the passphrase this file was encrypted with.';
+  document.getElementById('pass1Label').textContent = isExport ? 'Passphrase' : 'Passphrase';
+  document.getElementById('pass2Wrap').style.display = isExport ? 'block' : 'none';
+  document.getElementById('includeListsWrap').style.display = isExport ? 'flex' : 'none';
+  document.getElementById('passWarn').hidden = !isExport;
+  document.getElementById('passSubmitBtn').textContent = isExport ? 'Encrypt & download' : 'Decrypt';
+
+  passDialog.showModal();
+  document.getElementById('pass1').focus();
+
+  return new Promise((resolve, reject) => {
+    function onSubmit(e) {
+      e.preventDefault();
+      const p1 = document.getElementById('pass1').value;
+      const p2 = document.getElementById('pass2').value;
+      const errEl = document.getElementById('passError');
+
+      if (!p1) { errEl.textContent = 'Enter a passphrase.'; return; }
+      if (isExport && p1 !== p2) { errEl.textContent = "Passphrases don't match."; return; }
+
+      const includeLists = document.getElementById('includeListsCheckbox').checked;
+      cleanup();
+      passDialog.close();
+      resolve(isExport ? { passphrase: p1, includeLists } : p1);
+    }
+    function onCancel() {
+      cleanup();
+      passDialog.close();
+      reject(new Error('cancelled'));
+    }
+    function cleanup() {
+      passForm.removeEventListener('submit', onSubmit);
+      document.getElementById('passCancelBtn').removeEventListener('click', onCancel);
+    }
+    passForm.addEventListener('submit', onSubmit);
+    document.getElementById('passCancelBtn').addEventListener('click', onCancel);
+  });
+}
+
+/* ======================= Import confirmation dialog ======================= */
+const importInfoDialog = document.getElementById('importInfoDialog');
+
+function openImportInfoDialog() {
+  importInfoDialog.showModal();
+  return new Promise((resolve, reject) => {
+    function onContinue() {
+      cleanup();
+      importInfoDialog.close();
+      resolve();
+    }
+    function onCancel() {
+      cleanup();
+      importInfoDialog.close();
+      reject(new Error('cancelled'));
+    }
+    function cleanup() {
+      document.getElementById('importInfoContinueBtn').removeEventListener('click', onContinue);
+      document.getElementById('importInfoCancelBtn').removeEventListener('click', onCancel);
+    }
+    document.getElementById('importInfoContinueBtn').addEventListener('click', onContinue);
+    document.getElementById('importInfoCancelBtn').addEventListener('click', onCancel);
+  });
+}
+
+/* ======================= Connect screen ======================= */
+document.getElementById('loadListsBtn').addEventListener('click', () => attemptLogin());
+
+document.getElementById('importBtn').addEventListener('click', async () => {
+  try {
+    await openImportInfoDialog();
+    document.getElementById('importFileInput').click();
+  } catch (e) {
+    // cancelled — do nothing
+  }
+});
+
+document.getElementById('importFileInput').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  e.target.value = ''; // allow re-selecting the same file later
+  if (!file) return;
+
+  const errEl = document.getElementById('connectError');
+  errEl.textContent = '';
+
+  try {
+    const text = await file.text();
+    const passphrase = await openPassphraseDialog('import');
+    const decrypted = await decryptKeysFromFile(text, passphrase);
+    document.getElementById('pmdbKey').value = decrypted.pmdbKey || '';
+    document.getElementById('tmdbKey').value = decrypted.tmdbKey || '';
+    await attemptLogin(decrypted.catalogs || null);
+  } catch (err) {
+    if (err.message !== 'cancelled') errEl.textContent = err.message;
+  }
+});
+
+// Reconciles an imported list selection/order against what PMDB actually
+// has right now: keeps the imported order and checked state for lists that
+// still exist, drops ones that don't (e.g. a deleted custom list), and
+// appends any lists PMDB has that weren't in the export (unchecked).
+function mergeCatalogs(imported, fresh) {
+  const freshById = new Map(fresh.map(f => [f.id, f]));
+  const merged = [];
+  const used = new Set();
+
+  for (const imp of imported) {
+    const match = freshById.get(imp.id);
+    if (match) {
+      merged.push({ ...match, checked: !!imp.checked });
+      used.add(imp.id);
+    }
+  }
+  for (const f of fresh) {
+    if (!used.has(f.id)) merged.push(f);
+  }
+  return merged;
+}
+
+async function attemptLogin(importedCatalogs) {
+  const pmdbKey = document.getElementById('pmdbKey').value.trim();
+  const tmdbKey = document.getElementById('tmdbKey').value.trim();
+  const errEl = document.getElementById('connectError');
+  const btn = document.getElementById('loadListsBtn');
+  errEl.textContent = '';
+
+  if (!pmdbKey) { errEl.textContent = 'Enter your PMDB API key first.'; return; }
+  if (!tmdbKey) { errEl.textContent = 'Enter your TMDB API key first.'; return; }
+
+  btn.disabled = true;
+  btn.textContent = 'Loading…';
+
+  try {
+    const data = await fetchJson('/api/my-lists', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pmdbKey })
+    });
+
+    keys = { pmdbKey, tmdbKey };
+    const customLists = (data.lists || []).filter(l => l.type !== 'watchlist');
+    const freshItems = [
+      { id: 'continue-watching', name: 'Continue Watching', checked: true },
+      { id: 'watchlist', name: 'Watchlist', checked: true },
+      ...customLists.map(l => ({ id: `list:${l.id}`, name: l.name, listId: l.id, checked: false }))
+    ];
+    items = importedCatalogs ? mergeCatalogs(importedCatalogs, freshItems) : freshItems;
+
+    enterDashboard();
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = 'Load my lists';
+  }
+}
+
+/* ======================= Dashboard shell ======================= */
+function enterDashboard() {
+  document.getElementById('connectScreen').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'block';
+  renderConfigTab();
+  renderListsTab();
+}
+
+function signOut() {
+  keys = { pmdbKey: '', tmdbKey: '' };
+  items = [];
+  Object.keys(previewCache).forEach(k => delete previewCache[k]);
+  document.getElementById('pmdbKey').value = '';
+  document.getElementById('tmdbKey').value = '';
+  document.getElementById('result').style.display = 'none';
+  document.getElementById('dashboard').style.display = 'none';
+  document.getElementById('connectScreen').style.display = 'block';
+}
+
+// Settings cog menu
+const cogBtn = document.getElementById('cogBtn');
+const cogMenu = document.getElementById('cogMenu');
+cogBtn.addEventListener('click', (e) => {
+  e.stopPropagation();
+  cogMenu.hidden = !cogMenu.hidden;
+});
+document.addEventListener('click', () => { cogMenu.hidden = true; });
+
+cogMenu.addEventListener('click', async (e) => {
+  const action = e.target.dataset.action;
+  if (!action) return;
+  cogMenu.hidden = true;
+
+  if (action === 'signout') {
+    signOut();
+  } else if (action === 'export') {
+    try {
+      const { passphrase, includeLists } = await openPassphraseDialog('export');
+      const catalogs = includeLists
+        ? items.map(i => i.listId
+            ? { id: i.id, name: i.name, listId: i.listId, checked: i.checked }
+            : { id: i.id, name: i.name, checked: i.checked })
+        : null;
+      const fileText = await encryptKeysToFile(keys.pmdbKey, keys.tmdbKey, catalogs, passphrase);
+      const filename = includeLists ? 'publicmetadb-keys-and-lists.pmdbkeys' : 'publicmetadb-keys.pmdbkeys';
+      downloadTextFile(filename, fileText);
+    } catch (err) {
+      if (err.message !== 'cancelled') alert(err.message);
+    }
+  }
+});
+
+// Tab switching
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById(`panel-${btn.dataset.tab}`).classList.add('active');
+  });
+});
+
+/* ======================= Lists tab ======================= */
+// Each list's contents are fetched once, up front, at PREVIEW_LIMIT — not
+// lazily when a card is expanded. Expanding just toggles how much of the
+// already-loaded data is shown, so it's instant instead of a several-second wait.
+function renderListsTab() {
+  const container = document.getElementById('listCards');
+  container.innerHTML = '';
+
+  items.forEach(item => {
+    if (!previewCache[item.id]) {
+      previewCache[item.id] = { items: [], total: 0, loaded: false, loading: false, expanded: false, error: null };
+    }
+    const cache = previewCache[item.id];
+
+    const card = document.createElement('div');
+    card.className = 'list-card' + (cache.expanded ? ' expanded' : '');
+    card.innerHTML = `
+      <div class="list-card-head">
+        <span class="list-card-chevron">▶</span>
+        <span class="list-card-name">${item.name}</span>
+        <span class="list-card-count">${cache.total ? cache.total + ' items' : ''}</span>
+      </div>
+      <div class="card-body"></div>
+    `;
+
+    const body = card.querySelector('.card-body');
+    renderCardBody(body, item.id);
+
+    card.querySelector('.list-card-head').addEventListener('click', () => {
+      cache.expanded = !cache.expanded;
+      card.classList.toggle('expanded', cache.expanded);
+      renderCardBody(body, item.id);
+    });
+
+    container.appendChild(card);
+
+    // Prefetch immediately (not on expand) so expanding is instant by the
+    // time the user gets to it.
+    if (!cache.loaded && !cache.loading) {
+      loadListData(item.id).then(() => renderListsTab());
+    }
+  });
+}
+
+function renderCardBody(bodyEl, sourceId) {
+  const cache = previewCache[sourceId];
+
+  if (cache.loading) {
+    bodyEl.innerHTML = `<div class="card-loading">Loading…</div>`;
+    return;
+  }
+
+  if (cache.error) {
+    bodyEl.innerHTML = `<div class="card-empty">Couldn't load this list — ${cache.error}
+      <button type="button" class="text retry-btn">Retry</button></div>`;
+    bodyEl.querySelector('.retry-btn').addEventListener('click', () => {
+      loadListData(sourceId).then(() => renderListsTab());
+    });
+    return;
+  }
+
+  if (cache.items.length === 0) {
+    bodyEl.innerHTML = `<div class="card-empty">Nothing here yet.</div>`;
+    return;
+  }
+
+  const list = cache.expanded ? cache.items : cache.items.slice(0, 6);
+  const posters = list.map(m => `
+    <div class="poster" title="${m.title.replace(/"/g, '&quot;')}">
+      <img src="${m.poster}" alt="${m.title.replace(/"/g, '&quot;')}" loading="lazy" />
+    </div>
+  `).join('');
+
+  let html = cache.expanded
+    ? `<div class="poster-grid">${posters}</div>`
+    : `<div class="poster-row">${posters}</div>`;
+
+  if (cache.expanded && cache.total > cache.items.length) {
+    html += `<div class="card-empty">Showing first ${cache.items.length} of ${cache.total}.</div>`;
+  }
+
+  bodyEl.innerHTML = html;
+}
+
+async function loadListData(sourceId) {
+  const cache = previewCache[sourceId];
+  cache.loading = true;
+  cache.error = null;
+  try {
+    const data = await fetchJson('/api/preview', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pmdbKey: keys.pmdbKey, tmdbKey: keys.tmdbKey, sourceId, limit: PREVIEW_LIMIT })
+    });
+
+    cache.items = data.items || [];
+    cache.total = data.total ?? cache.items.length;
+    cache.loaded = true;
+  } catch (e) {
+    cache.error = e.message;
+  } finally {
+    cache.loading = false;
+  }
+}
+
+/* ======================= Configuration tab (reorder) ======================= */
+function renderConfigTab() {
+  const container = document.getElementById('catalogList');
+  container.innerHTML = '';
+
+  items.forEach((item, idx) => {
+    const row = document.createElement('div');
+    row.className = 'catalog-item' + (item.checked ? '' : ' unchecked');
+    row.dataset.key = item.id;
+
+    row.innerHTML = `
+      <span class="pos">${String(idx + 1).padStart(2, '0')}</span>
+      <span class="handle" title="Drag to reorder">⠿</span>
+      <input type="checkbox" ${item.checked ? 'checked' : ''} />
+      <span class="catalog-name">${item.name}</span>
+      <span class="order-btns">
+        <button type="button" data-dir="up" ${idx === 0 ? 'disabled' : ''} title="Move up">▲</button>
+        <button type="button" data-dir="down" ${idx === items.length - 1 ? 'disabled' : ''} title="Move down">▼</button>
+      </span>
+    `;
+
+    row.querySelector('input[type=checkbox]').addEventListener('change', (e) => {
+      item.checked = e.target.checked;
+      renderConfigTab();
+    });
+
+    row.querySelectorAll('.order-btns button').forEach(b => {
+      b.addEventListener('click', () => {
+        const dir = b.dataset.dir === 'up' ? -1 : 1;
+        const target = idx + dir;
+        if (target < 0 || target >= items.length) return;
+        [items[idx], items[target]] = [items[target], items[idx]];
+        renderConfigTab();
+      });
+    });
+
+    row.querySelector('.handle').addEventListener('pointerdown', (e) => startDrag(e, row, container));
+
+    container.appendChild(row);
+  });
+}
+
+// Pointer-events-based reordering. Deliberately avoids the native HTML5
+// Drag and Drop API, which is unreliable on Linux (both Firefox and
+// Chromium-based browsers, especially under Wayland) — dragstart/dragover
+// often silently fail to fire. This implementation only depends on
+// pointerdown/pointermove/pointerup, which behave consistently everywhere
+// and also work for touch.
+function startDrag(downEvent, row, container) {
+  downEvent.preventDefault();
+  row.classList.add('dragging');
+  document.body.style.userSelect = 'none';
+
+  function onMove(e) {
+    const overEl = document.elementFromPoint(e.clientX, e.clientY);
+    const overRow = overEl && overEl.closest ? overEl.closest('.catalog-item') : null;
+    if (!overRow || overRow === row || overRow.parentElement !== container) return;
+
+    const rows = [...container.children];
+    const fromPos = rows.indexOf(row);
+    const toPos = rows.indexOf(overRow);
+    if (fromPos < toPos) {
+      container.insertBefore(row, overRow.nextSibling);
+    } else {
+      container.insertBefore(row, overRow);
+    }
+  }
+
+  function onUp() {
+    document.removeEventListener('pointermove', onMove);
+    document.removeEventListener('pointerup', onUp);
+    row.classList.remove('dragging');
+    document.body.style.userSelect = '';
+
+    // Commit the DOM order back into the `items` array, then do a full
+    // re-render to refresh position numbers and up/down button states.
+    const newOrder = [...container.children]
+      .map(el => items.find(i => i.id === el.dataset.key))
+      .filter(Boolean);
+    items = newOrder;
+    renderConfigTab();
+  }
+
+  document.addEventListener('pointermove', onMove);
+  document.addEventListener('pointerup', onUp);
+}
+
+document.getElementById('generateBtn').addEventListener('click', async () => {
+  const errEl = document.getElementById('configError');
+  const btn = document.getElementById('generateBtn');
+  errEl.textContent = '';
+
+  const checked = items.filter(i => i.checked);
+  if (checked.length === 0) {
+    errEl.textContent = 'Pick at least one catalog.';
+    return;
+  }
+
+  const catalogs = checked.map(i =>
+    i.listId ? { id: i.id, name: i.name, listId: i.listId } : { id: i.id, name: i.name }
+  );
+
+  btn.disabled = true;
+  const originalText = btn.textContent;
+  btn.textContent = 'Generating…';
+
+  try {
+    const data = await fetchJson('/api/build-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ pmdbKey: keys.pmdbKey, tmdbKey: keys.tmdbKey, catalogs })
+    });
+
+    const manifestUrl = `${location.origin}/${data.config}/manifest.json`;
+    document.getElementById('manifestUrl').textContent = manifestUrl;
+    document.getElementById('result').style.display = 'block';
+    document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  } catch (e) {
+    errEl.textContent = e.message;
+  } finally {
+    btn.disabled = false;
+    btn.textContent = originalText;
+  }
+});
+
+document.getElementById('copyBtn').addEventListener('click', async () => {
+  const text = document.getElementById('manifestUrl').textContent;
+  try {
+    await navigator.clipboard.writeText(text);
+    const btn = document.getElementById('copyBtn');
+    const original = btn.textContent;
+    btn.textContent = 'Copied!';
+    setTimeout(() => { btn.textContent = original; }, 1500);
+  } catch (e) {
+    // Clipboard API unavailable — user can select the text manually.
+  }
+});
+</script>
+</body>
+</html>
