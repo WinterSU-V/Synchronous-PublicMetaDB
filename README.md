@@ -202,6 +202,21 @@ URL. Free tiers for *always-on* Node hosting have gotten scarcer — Heroku
 and Glitch both dropped theirs — and the ones that remain come with a
 tradeoff worth knowing for this specific app:
 
+- **Beamup**, run by Stremio's own team specifically for hosting Stremio
+  addons, and free. Deploy with `npm install beamup-cli -g && beamup`
+  (or `git push beamup master` for updates) — Dokku-based, needs your
+  server to read `PORT` from the environment (ours already does) and
+  either a Heroku buildpack or Dockerfile; a plain `package.json` is
+  enough for Node. Per its own infrastructure repo, it runs on a Docker
+  Swarm cluster rather than a serverless/scale-to-zero model, which
+  suggests (though isn't explicitly guaranteed) that deployed addons stay
+  warm instead of sleeping after inactivity — unlike Render below. Two
+  things aren't documented and are worth testing before relying on it:
+  whether the on-disk TMDB cache survives a redeploy (likely not, same
+  caveat as Render), and how its addon-specific edge caching interacts
+  with this app's per-user dynamic catalog responses. Given it's free and
+  purpose-built for exactly this, it's worth trying first:
+  https://github.com/Stremio/stremio-addon-sdk/blob/master/docs/deploying/beamup.md
 - **Render's free web service** is the easiest to wire up (GitHub
   integration, auto-deploy on push), but free instances spin down after
   inactivity and take 30-60 seconds to wake on the next request. Since
