@@ -184,5 +184,26 @@ async function getCatalog(config, requestedId) {
 
   return { metas: previews };
 }
-
-module.exports = { buildManifest, getCatalog };
+// A minimal manifest for the bare /manifest.json URL (no config token).
+// Stremio — and validators like Beamup's — expect every addon to answer
+// at this fixed path. Since this addon needs per-user keys before it can
+// serve real catalogs, this version has none and tells Stremio (via
+// configurationRequired) that setup is needed first.
+function buildBaseManifest(logoUrl) {
+return {
+id: ADDON_ID,
+version: ADDON_VERSION,
+name: 'Synchronous: PublicMetaDB',
+description:
+'Continue Watching, Watchlist, and custom lists synced from your PublicMetaDB account. Visit /configure to set up.',
+resources: ['catalog'],
+types: ['movie', 'series'],
+catalogs: [],
+...(logoUrl ? { logo: logoUrl } : {}),
+behaviorHints: {
+configurable: true,
+configurationRequired: true
+}
+};
+}
+module.exports = { buildManifest, buildBaseManifest, getCatalog };

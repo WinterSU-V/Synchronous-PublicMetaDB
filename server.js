@@ -3,7 +3,7 @@ const cors = require('cors');
 const path = require('path');
 
 const { encodeConfig, decodeConfig } = require('./src/config');
-const { buildManifest, getCatalog } = require('./src/addon');
+const { buildManifest, buildBaseManifest, getCatalog } = require('./src/addon');
 const pmdb = require('./src/pmdb');
 const lists = require('./src/lists');
 const tmdb = require('./src/tmdb');
@@ -91,6 +91,16 @@ function requireConfig(req, res, next) {
   req.pmdbConfig = config;
   next();
 }
+
+app.get('/manifest.json', async (req, res) => {
+try {
+const logoUrl = `${req.protocol}://${req.get('host')}/icon.png`;
+res.json(buildBaseManifest(logoUrl));
+} catch (e) {
+console.error(e);
+res.status(500).json({ err: 'Failed to build manifest' });
+}
+});
 
 app.get('/:config/manifest.json', requireConfig, async (req, res) => {
   try {
