@@ -429,6 +429,18 @@
     margin-bottom: 12px;
   }
 
+  .result .install-btn {
+    display: inline-block;
+    padding: 12px 20px;
+    border-radius: 10px;
+    background: var(--amber);
+    color: #1a1408;
+    font-weight: 600;
+    text-decoration: none;
+    margin-bottom: 10px;
+  }
+  .result .install-btn:hover { filter: brightness(1.08); }
+
   /* ---------- Dialog (passphrase prompt) ---------- */
   dialog {
     background: var(--surface-raised);
@@ -586,8 +598,9 @@
 
       <div class="result" id="result">
         <strong>Manifest URL</strong>
-        <code id="manifestUrl"></code>
-        <button class="secondary" id="copyBtn" type="button">Copy URL</button>
+         <code id="manifestUrl"></code>
+   	 <a class="install-btn" id="installLink" href="#">Install in Stremio</a>
+   	 <button class="secondary" id="copyBtn" type="button">Copy URL</button>
         <p class="hint" style="margin-top:14px;">Paste this into Stremio → Addons → search bar. (The stremio:// deep link is unreliable for local addresses, so manual paste is the reliable path.)</p>
       </div>
     </section>
@@ -1220,6 +1233,8 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
 
     const manifestUrl = `${location.origin}/${data.config}/manifest.json`;
     document.getElementById('manifestUrl').textContent = manifestUrl;
+    const stremioLink = `stremio://${location.host}/${data.config}/manifest.json`;
+    document.getElementById('installLink').href = stremioLink;
     document.getElementById('result').style.display = 'block';
     document.getElementById('result').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   } catch (e) {
