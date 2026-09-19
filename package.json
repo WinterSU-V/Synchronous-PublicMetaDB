@@ -1,6 +1,6 @@
 {
   "name": "pmdb-stremio-addon",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Stremio addon backed by PublicMetaDB: Continue Watching, Watchlist, and custom lists",
   "main": "server.js",
   "scripts": {
@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/YOUR-USERNAME/pmdb-stremio-addon.git"
+    "url": "https://github.com/WInterSU-V/pmdb-stremio-addon.git"
   },
   "dependencies": {
     "cors": "^2.8.5",

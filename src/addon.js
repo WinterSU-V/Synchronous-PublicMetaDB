@@ -2,7 +2,7 @@ const lists = require('./lists');
 const tmdb = require('./tmdb');
 
 const ADDON_ID = 'com.publicmetadb.stremio';
-const ADDON_VERSION = '1.2.1';
+const ADDON_VERSION = '1.2.2';
 
 // Every logical catalog (continue-watching / watchlist / list:xxx) becomes
 // two Stremio catalogs, one per content type, since a single Stremio
@@ -11,26 +11,13 @@ function catalogIdFor(baseId, type) {
   return `pmdb-${baseId}-${type}`;
 }
 
-// If a list's own name already signals its media type ("Anime Movies",
-// "Kids Shows"), don't pile the addon's own label on top of it — only add
-// one when the name doesn't already say so for that particular type. This
-// keeps e.g. a list called "Best Sci-Fi Movies" from becoming "Best Sci-Fi
-// Movies · Movies" in Stremio, while a plain list like "Watchlist" still
-// gets "Watchlist · Movies" / "Watchlist · Series" so the two type-specific
-// catalogs it becomes are distinguishable.
-const MOVIE_KEYWORDS = ['movie', 'movies', 'film', 'films'];
-const SERIES_KEYWORDS = ['series', 'show', 'shows', 'tv'];
-
-function nameHasAnyKeyword(name, keywords) {
-  const lower = name.toLowerCase();
-  return keywords.some((kw) => new RegExp(`\\b${kw}\\b`, 'i').test(lower));
-}
-
+// Stremio's Home screen appends its own type label (" – Movie" / " – Series")
+// to every catalog row unconditionally — confirmed by testing, not just to
+// avoid name collisions as originally assumed. Any suffix added here was
+// always redundant on top of that, so names pass through unchanged and
+// Stremio handles the disambiguation entirely on its own.
 function catalogDisplayName(baseName, type) {
-  const keywords = type === 'movie' ? MOVIE_KEYWORDS : SERIES_KEYWORDS;
-  if (nameHasAnyKeyword(baseName, keywords)) return baseName;
-  const suffix = type === 'movie' ? 'Movies' : 'Series';
-  return `${baseName} · ${suffix}`;
+  return baseName;
 }
 
 async function buildManifest(config, logoUrl) {
