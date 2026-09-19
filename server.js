@@ -1,5 +1,4 @@
 const express = require('express');
-app.set('trust proxy', true);
 const cors = require('cors');
 const path = require('path');
 
@@ -10,6 +9,7 @@ const lists = require('./src/lists');
 const tmdb = require('./src/tmdb');
 
 const app = express();
+app.set('trust proxy', true);
 app.use(cors());
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
