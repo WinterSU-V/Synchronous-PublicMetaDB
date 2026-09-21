@@ -12,7 +12,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/WInterSU-V/pmdb-stremio-addon.git"
+    "url": "https://github.com/WinterSU-V/Synchronous-PublicMetaDB"
   },
   "dependencies": {
     "cors": "^2.8.5",

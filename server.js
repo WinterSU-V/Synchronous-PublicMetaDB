@@ -95,7 +95,9 @@ function requireConfig(req, res, next) {
 
 app.get('/manifest.json', async (req, res) => {
 try {
-const logoUrl = `${req.protocol}://${req.get('host')}/icon.png`;
+const host = req.get('host');
+const isLocal = /^(127\.0\.0\.1|localhost)(:\d+)?$/.test(host);
+const logoUrl = `${isLocal ? 'http' : 'https'}://${host}/icon.png`;
 res.json(buildBaseManifest(logoUrl));
 } catch (e) {
 console.error(e);
@@ -105,7 +107,9 @@ res.status(500).json({ err: 'Failed to build manifest' });
 
 app.get('/:config/manifest.json', requireConfig, async (req, res) => {
   try {
-    const logoUrl = `${req.protocol}://${req.get('host')}/icon.png`;
+    const host = req.get('host');
+    const isLocal = /^(127\.0\.0\.1|localhost)(:\d+)?$/.test(host);
+    const logoUrl = `${isLocal ? 'http' : 'https'}://${host}/icon.png`;
     const manifest = await buildManifest(req.pmdbConfig, logoUrl);
     res.json(manifest);
   } catch (e) {
