@@ -2,8 +2,8 @@ const lists = require('./lists');
 const tmdb = require('./tmdb');
 
 const ADDON_ID = 'com.publicmetadb.stremio';
-const ADDON_VERSION = '1.2.2';
-
+const ADDON_VERSION = '1.2.4';
+const LOGO_URL = 'https://raw.githubusercontent.com/WinterSU-V/Synchronous-PublicMetaDB/main/public/icon.png'
 // Every logical catalog (continue-watching / watchlist / list:xxx) becomes
 // two Stremio catalogs, one per content type, since a single Stremio
 // catalog can't mix movies and series.
@@ -20,7 +20,7 @@ function catalogDisplayName(baseName, type) {
   return baseName;
 }
 
-async function buildManifest(config, logoUrl) {
+async function buildManifest(config) {
   const catalogs = [];
 
   // config.catalogs is in the user's chosen display order (set on the
@@ -74,7 +74,7 @@ async function buildManifest(config, logoUrl) {
     resources: ['catalog'],
     types: ['movie', 'series'],
     catalogs,
-    ...(logoUrl ? { logo: logoUrl } : {}),
+    logo: LOGO_URL,
     behaviorHints: {
       configurable: true,
       configurationRequired: false
@@ -176,7 +176,7 @@ async function getCatalog(config, requestedId) {
 // at this fixed path. Since this addon needs per-user keys before it can
 // serve real catalogs, this version has none and tells Stremio (via
 // configurationRequired) that setup is needed first.
-function buildBaseManifest(logoUrl) {
+function buildBaseManifest() {
 return {
 id: ADDON_ID,
 version: ADDON_VERSION,
@@ -186,7 +186,7 @@ description:
 resources: ['catalog'],
 types: ['movie', 'series'],
 catalogs: [],
-...(logoUrl ? { logo: logoUrl } : {}),
+logo: LOGO_URL,
 behaviorHints: {
 configurable: true,
 configurationRequired: true
