@@ -4,6 +4,7 @@ const tmdb = require('./tmdb');
 const ADDON_ID = 'com.publicmetadb.stremio';
 const ADDON_VERSION = '1.2.4';
 const LOGO_URL = 'https://raw.githubusercontent.com/WinterSU-V/Synchronous-PublicMetaDB/main/public/icon.png';
+
 // Every logical catalog (continue-watching / watchlist / list:xxx) becomes
 // two Stremio catalogs, one per content type, since a single Stremio
 // catalog can't mix movies and series.
