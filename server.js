@@ -94,21 +94,17 @@ function requireConfig(req, res, next) {
 }
 
 app.get('/manifest.json', async (req, res) => {
-try {
-buildManifest(req.pmdbConfig);
-buildBaseManifest();
-res.json(buildBaseManifest(logoUrl));
-} catch (e) {
-console.error(e);
-res.status(500).json({ err: 'Failed to build manifest' });
-}
+  try {
+    res.json(buildBaseManifest());
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ err: 'Failed to build manifest' });
+  }
 });
 
 app.get('/:config/manifest.json', requireConfig, async (req, res) => {
   try {
-    buildManifest(req.pmdbConfig);
-    buildBaseManifest();
-    const manifest = await buildManifest(req.pmdbConfig, logoUrl);
+    const manifest = await buildManifest(req.pmdbConfig);
     res.json(manifest);
   } catch (e) {
     console.error(e);
