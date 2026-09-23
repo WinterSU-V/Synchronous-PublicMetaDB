@@ -20,6 +20,12 @@ other devices too.
 
 ### Option A — locally, for personal use only
 
+###### Cloning and navigating into the repository:
+```bash
+git clone https://github.com/WinterSU-V/Synchronous-PublicMetaDB.git
+cd Synchronous-PublicMetaDB
+```
+###### Starting the server:
 ```bash
 npm install
 npm start
