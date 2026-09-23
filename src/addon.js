@@ -2,7 +2,7 @@ const lists = require('./lists');
 const tmdb = require('./tmdb');
 
 const ADDON_ID = 'com.publicmetadb.stremio';
-const ADDON_VERSION = '1.2.4';
+const ADDON_VERSION = '1.2.6';
 const LOGO_URL = 'https://raw.githubusercontent.com/WinterSU-V/Synchronous-PublicMetaDB/main/public/icon.png';
 
 // Every logical catalog (continue-watching / watchlist / list:xxx) becomes
@@ -180,6 +180,10 @@ async function getCatalog(config, requestedId) {
 function buildBaseManifest() {
 return {
 id: ADDON_ID,
+stremioAddonsConfig: {
+      issuer: 'https://stremio-addons.net',
+      signature: 'eyJhbGciOiJkaXIiLCJlbmMiOiJBMTI4Q0JDLUhTMjU2In0..QdxPJq8z-Dx9i7oVMECtjA.IPxx6HOJDM4GFThXBp02mFKsU2vXsUflDLSk2LPf2FCQNBXzHtHjjuqnFOCRcWhXEQ7xSrwkZTbFuyKhu10g6A0x_XRw4s4ddQTfbL68F0d0gUdE3hEDZt5SkDDYFHB2.uaDJYdiFYbilsta_vuWhFw'
+    },
 version: ADDON_VERSION,
 name: 'Synchronous: PublicMetaDB',
 description:
