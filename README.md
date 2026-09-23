@@ -93,6 +93,15 @@ manifest URL publicly.
 and a running log of git/deployment troubleshooting for anything not
 covered here.
 
+## Credits
+
+**Created by [WinterSU-V](https://github.com/WinterSU-V)**, built with [Claude](https://claude.com) (Anthropic).
+
+- [PublicMetaDB](https://publicmetadb.com) — the source of your lists and watch history.
+- [Stremio](https://www.stremio.com) — the SDK and manifest format this addon implements, and [Beamup](https://github.com/Stremio/stremio-beamup), their own free hosting for addons.
+
+This product uses the TMDB API but is not endorsed or certified by TMDB.
+
 ## License
 
 MIT — see `LICENSE`.
