@@ -575,7 +575,7 @@
     <footer class="page-footer">
       <a href="https://github.com/WinterSU-V/Synchronous-PublicMetaDB" target="_blank" rel="noopener">View source on GitHub</a>
       <a href="https://ko-fi.com/iwintersuv" target="_blank" rel="noopener">Support on Ko-fi</a>
-      <span class="footer-version">v1.2.8</span>
+      <span class="footer-version">v1.2.9</span>
     </footer>
     <p class="tmdb-attribution">
       <img src="/tmdb-logo.svg" alt="TMDB" class="tmdb-logo" />
@@ -627,7 +627,7 @@
     <footer class="page-footer">
       <a href="https://github.com/WinterSU-V/Synchronous-PublicMetaDB" target="_blank" rel="noopener">View source on GitHub</a>
       <a href="https://ko-fi.com/iwintersuv" target="_blank" rel="noopener">Support on Ko-fi</a>
-      <span class="footer-version">v1.2.8</span>
+      <span class="footer-version">v1.2.9</span>
     </footer>
     <p class="tmdb-attribution">
      <img src="/tmdb-logo.svg" alt="TMDB" class="tmdb-logo" />
@@ -1288,9 +1288,17 @@ document.getElementById('copyBtn').addEventListener('click', async () => {
 // a keys file.
 if (window.__PRELOADED_CONFIG__) {
   const preloaded = window.__PRELOADED_CONFIG__;
+  const selectedIds = new Set((preloaded.catalogs || []).map(c => c.id));
   document.getElementById('pmdbKey').value = preloaded.pmdbKey || '';
   document.getElementById('tmdbKey').value = preloaded.tmdbKey || '';
-  attemptLogin(preloaded.catalogs || null);
+  attemptLogin(preloaded.catalogs || null).then(() => {
+    // A token only contains the lists that were selected, so selection is
+    // exactly "in the token or not". Without this, the merge restores order
+    // but treats every entry as unchecked, and lists that were deselected
+    // can reappear checked via their fresh defaults.
+    items.forEach(i => { i.checked = selectedIds.has(i.id); });
+    renderConfigTab();
+  });
 }
 </script>
 </body>
