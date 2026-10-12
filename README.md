@@ -101,6 +101,8 @@ covered here.
 
 ## Credits
 
+If this saved you some time: [☕ ko-fi.com/iwintersuv](https://ko-fi.com/iwintersuv)
+
 **Created by [WinterSU-V](https://github.com/WinterSU-V)**, built with [Claude](https://claude.com) (Anthropic).
 
 - [PublicMetaDB](https://publicmetadb.com) — the source of your lists and watch history.

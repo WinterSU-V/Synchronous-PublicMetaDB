@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 
 const { encodeConfig, decodeConfig } = require('./src/config');
 const { buildManifest, buildBaseManifest, getCatalog } = require('./src/addon');
@@ -21,6 +22,16 @@ const PORT = process.env.PORT || 7000;
 app.get('/', (req, res) => res.redirect('/configure'));
 app.get('/configure', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'configure.html'));
+});
+app.get('/:config/configure', (req, res) => {
+  const config = decodeConfig(req.params.config);
+  const html = fs.readFileSync(path.join(__dirname, 'public', 'configure.html'), 'utf8');
+  if (!config) return res.send(html); // bad/corrupt token — just show the normal blank page
+  const injected = html.replace(
+    '</head>',
+    `<script>window.__PRELOADED_CONFIG__ = ${JSON.stringify(config)};</script></head>`
+  );
+  res.send(injected);
 });
 
 // Proxies the "list your lists" call server-side so the browser doesn't
