@@ -8,6 +8,7 @@ const { buildManifest, buildBaseManifest, getCatalog } = require('./src/addon');
 const pmdb = require('./src/pmdb');
 const lists = require('./src/lists');
 const tmdb = require('./src/tmdb');
+const badge = require('./src/badge');
 
 const app = express();
 app.set('trust proxy', true);
@@ -87,13 +88,19 @@ app.post('/api/preview', async (req, res) => {
 });
 
 app.post('/api/build-config', (req, res) => {
-  const { pmdbKey, tmdbKey, catalogs } = req.body || {};
+  const { pmdbKey, tmdbKey, catalogs, badges } = req.body || {};
+  const cleanBadges = badge.sanitizeSettings(badges);
   if (!pmdbKey || !tmdbKey || !Array.isArray(catalogs)) {
     return res.status(400).json({ error: 'pmdbKey, tmdbKey, and catalogs are required' });
   }
-  const config = encodeConfig({ pmdbKey, tmdbKey, catalogs });
+  const config = encodeConfig({ pmdbKey, tmdbKey, catalogs, ...(cleanBadges ? { badges: cleanBadges } : {}) });
   res.json({ config });
 });
+
+// Poster rating badges (see src/badge.js). Stateless: the URL carries everything.
+app.get('/badge/:file', badge.handle);
+// Lets you check from outside whether the optional image library installed on this host.
+app.get('/badge-status', (req, res) => res.json({ available: badge.isAvailable() }));
 
 // ---- Stremio addon protocol ------------------------------------------
 

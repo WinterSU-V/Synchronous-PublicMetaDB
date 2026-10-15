@@ -538,6 +538,27 @@
     opacity: 0.7;
   }
 
+  .badge-card {
+    margin-top: 22px;
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+  }
+  .badge-toggle {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin: 0;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: var(--text);
+    text-transform: none;
+    letter-spacing: normal;
+    cursor: pointer;
+  }
+  .badge-toggle input { width: 17px; height: 17px; accent-color: var(--amber); }
+
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
   }
@@ -575,7 +596,7 @@
     <footer class="page-footer">
       <a href="https://github.com/WinterSU-V/Synchronous-PublicMetaDB" target="_blank" rel="noopener">View source on GitHub</a>
       <a href="https://ko-fi.com/iwintersuv" target="_blank" rel="noopener">Support on Ko-fi</a>
-      <span class="footer-version">v1.2.9</span>
+      <span class="footer-version">v1.2.10</span>
     </footer>
     <p class="tmdb-attribution">
       <img src="/tmdb-logo.svg" alt="TMDB" class="tmdb-logo" />
@@ -612,6 +633,10 @@
     <section class="panel" id="panel-config">
       <p class="section-desc">This is the running order Stremio will use. Drag the handle, or use the arrows, to rearrange. Only checked rows are added.</p>
       <div class="catalog-list" id="catalogList"></div>
+      <div class="badge-card">
+        <label class="badge-toggle"><input type="checkbox" id="badgesEnabled" /> Show TMDB rating badge on posters</label>
+        <p class="hint">Draws a small star-and-score badge in the top-right of each poster. Posters are then served through this addon rather than straight from TMDB, so this is off by default.</p>
+      </div>
       <button id="generateBtn">Generate install link</button>
       <div class="error" id="configError"></div>
 
@@ -627,7 +652,7 @@
     <footer class="page-footer">
       <a href="https://github.com/WinterSU-V/Synchronous-PublicMetaDB" target="_blank" rel="noopener">View source on GitHub</a>
       <a href="https://ko-fi.com/iwintersuv" target="_blank" rel="noopener">Support on Ko-fi</a>
-      <span class="footer-version">v1.2.9</span>
+      <span class="footer-version">v1.2.10</span>
     </footer>
     <p class="tmdb-attribution">
      <img src="/tmdb-logo.svg" alt="TMDB" class="tmdb-logo" />
@@ -1229,6 +1254,14 @@ function startDrag(downEvent, row, container) {
   document.addEventListener('pointerup', onUp);
 }
 
+// Poster badge settings. Only the on/off switch is exposed in the UI for now;
+// the style fields are carried in the install link so they can be made editable later.
+let badgeStyle = { pos: 'tr', size: 12, opacity: 90, shape: 'pill' };
+function badgeSettings() {
+  if (!document.getElementById('badgesEnabled').checked) return null;
+  return { enabled: true, base: location.origin, ...badgeStyle };
+}
+
 document.getElementById('generateBtn').addEventListener('click', async () => {
   const errEl = document.getElementById('configError');
   const btn = document.getElementById('generateBtn');
@@ -1252,7 +1285,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     const data = await fetchJson('/api/build-config', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pmdbKey: keys.pmdbKey, tmdbKey: keys.tmdbKey, catalogs })
+      body: JSON.stringify({ pmdbKey: keys.pmdbKey, tmdbKey: keys.tmdbKey, catalogs, badges: badgeSettings() })
     });
 
     const manifestUrl = `${location.origin}/${data.config}/manifest.json`;
@@ -1297,6 +1330,12 @@ if (window.__PRELOADED_CONFIG__) {
     // but treats every entry as unchecked, and lists that were deselected
     // can reappear checked via their fresh defaults.
     items.forEach(i => { i.checked = selectedIds.has(i.id); });
+    if (preloaded.badges) {
+      document.getElementById('badgesEnabled').checked = !!preloaded.badges.enabled;
+      ['pos', 'size', 'opacity', 'shape'].forEach(k => {
+        if (preloaded.badges[k] != null) badgeStyle[k] = preloaded.badges[k];
+      });
+    }
     renderConfigTab();
   });
 }

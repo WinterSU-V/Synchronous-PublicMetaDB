@@ -1,8 +1,9 @@
 const lists = require('./lists');
 const tmdb = require('./tmdb');
+const badge = require('./badge');
 
 const ADDON_ID = 'com.publicmetadb.stremio';
-const ADDON_VERSION = '1.2.9';
+const ADDON_VERSION = '1.2.10';
 const LOGO_URL = 'https://raw.githubusercontent.com/WinterSU-V/Synchronous-PublicMetaDB/main/public/icon.png';
 
 // Every logical catalog (continue-watching / watchlist / list:xxx) becomes
@@ -166,7 +167,7 @@ async function getCatalog(config, requestedId) {
       const extra = {};
       if (item.season != null) extra.season = item.season;
       if (item.episode != null) extra.episode = item.episode;
-      return toMetaPreview(metas[idx], extra);
+      return badge.applyPoster(toMetaPreview(metas[idx], extra), metas[idx], config);
     })
     .filter(Boolean);
 

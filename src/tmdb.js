@@ -26,7 +26,7 @@ function loadCacheFromDisk() {
     const entries = JSON.parse(raw);
     const now = Date.now();
     for (const [key, value] of entries) {
-      if (value && value.expires > now) cache.set(key, value);
+      if (value && key.startsWith('v2:') && value.expires > now) cache.set(key, value);
     }
   } catch (e) {
     // No file yet, or unreadable/corrupt — start with an empty cache.
@@ -52,7 +52,7 @@ function scheduleSave() {
 loadCacheFromDisk();
 
 function cacheKey(tmdbId, mediaType) {
-  return `${mediaType}:${tmdbId}`;
+  return `v2:${mediaType}:${tmdbId}`;
 }
 
 function sleep(ms) {
@@ -141,6 +141,8 @@ async function fetchFromTmdb(tmdbId, mediaType, tmdbKey, deadlineAt) {
     mediaType: kind,
     title: kind === 'tv' ? data.name : data.title,
     poster: data.poster_path ? IMG_BASE + data.poster_path : null,
+    posterPath: data.poster_path || null,
+    voteAverage: typeof data.vote_average === 'number' ? data.vote_average : null,
     imdbId,
     releaseDate: kind === 'tv' ? data.first_air_date : data.release_date
   };
