@@ -559,6 +559,26 @@
   }
   .badge-toggle input { width: 17px; height: 17px; accent-color: var(--amber); }
 
+  .badge-card { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+  .badge-status { font-size: 0.88rem; }
+  .badge-card button.text { padding: 0; font-size: 0.85rem; }
+  .badge-controls { margin-top: 18px; display: grid; gap: 22px; }
+  .badge-controls.disabled { opacity: 0.45; pointer-events: none; }
+  .ctl-label { display: block; font-size: 0.8rem; font-weight: 600; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 8px; }
+  .pos-picker { display: grid; grid-template-columns: repeat(3, 28px); gap: 54px 16px; padding: 12px 16px; width: max-content; background: var(--surface-raised); border: 1px solid var(--line); border-radius: 8px; }
+  .pos-picker button { padding: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--line); border: 1px solid transparent; }
+  .pos-picker button.on { background: var(--amber); }
+  .seg { display: flex; flex-wrap: wrap; gap: 8px; }
+  .seg button { padding: 8px 14px; background: transparent; border: 1px solid var(--line); color: var(--text); font-size: 0.85rem; font-weight: 500; }
+  .seg button.on { border-color: var(--amber); color: var(--amber); }
+  .range-row { display: flex; align-items: center; gap: 12px; }
+  .range-row input[type=range] { flex: 1; accent-color: var(--amber); }
+  .range-val { font-family: var(--mono); font-size: 0.8rem; color: var(--text-muted); min-width: 3.2em; text-align: right; }
+  .badge-preview-wrap { position: sticky; top: 0; z-index: 5; background: var(--bg); padding: 12px 0; margin-top: 14px; border-bottom: 1px solid var(--line); }
+  .badge-preview { display: flex; gap: 10px; min-height: 60px; }
+  .bp { width: 30%; max-width: 150px; aspect-ratio: 2 / 3; border-radius: 8px; overflow: hidden; background: var(--surface-raised); }
+  .bp img { width: 100%; height: 100%; object-fit: cover; display: block; }
+
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
   }
@@ -596,7 +616,7 @@
     <footer class="page-footer">
       <a href="https://github.com/WinterSU-V/Synchronous-PublicMetaDB" target="_blank" rel="noopener">View source on GitHub</a>
       <a href="https://ko-fi.com/iwintersuv" target="_blank" rel="noopener">Support on Ko-fi</a>
-      <span class="footer-version">v1.2.10</span>
+      <span class="footer-version">v1.3.0</span>
     </footer>
     <p class="tmdb-attribution">
       <img src="/tmdb-logo.svg" alt="TMDB" class="tmdb-logo" />
@@ -624,18 +644,62 @@
     <nav class="tabs">
       <button class="tab-btn active" data-tab="lists">Lists</button>
       <button class="tab-btn" data-tab="config">Configuration</button>
+      <button class="tab-btn" data-tab="badges">Badges</button>
     </nav>
 
     <section class="panel active" id="panel-lists">
       <div id="listCards"></div>
     </section>
 
+    <section class="panel" id="panel-badges">
+      <p class="section-desc">Draw a TMDB rating on each poster. Posters are then served through this addon instead of straight from TMDB, so this is off by default.</p>
+      <label class="badge-toggle"><input type="checkbox" id="badgesEnabled" /> Show TMDB rating badge on posters</label>
+
+      <div class="badge-preview-wrap">
+        <div class="badge-preview" id="badgePreview"></div>
+      </div>
+      <p class="hint">Preview uses posters from your lists with sample ratings, drawn by this addon exactly as your app will receive them.</p>
+
+      <div class="badge-controls" id="badgeControls">
+        <div>
+          <span class="ctl-label">Position</span>
+          <div class="pos-picker" id="posPicker">
+            <button type="button" data-pos="tl" title="Top left"></button>
+            <button type="button" data-pos="tc" title="Top centre"></button>
+            <button type="button" data-pos="tr" title="Top right"></button>
+            <button type="button" data-pos="bl" title="Bottom left"></button>
+            <button type="button" data-pos="bc" title="Bottom centre"></button>
+            <button type="button" data-pos="br" title="Bottom right"></button>
+          </div>
+          <p class="hint">Apps draw their own overlays on posters: Stremio puts its watched tick top-left, Nuvio top-right. Pick a spot your app doesn't use.</p>
+        </div>
+        <div>
+          <span class="ctl-label">Shape</span>
+          <div class="seg" id="shapePicker">
+            <button type="button" data-shape="pill">Pill</button>
+            <button type="button" data-shape="rounded">Rounded</button>
+            <button type="button" data-shape="square">Square</button>
+            <button type="button" data-shape="circle">Circle</button>
+          </div>
+        </div>
+        <div>
+          <span class="ctl-label">Size</span>
+          <div class="range-row"><input type="range" id="sizeRange" min="8" max="24" step="1" /><span class="range-val" id="sizeVal"></span></div>
+        </div>
+        <div>
+          <span class="ctl-label">Opacity</span>
+          <div class="range-row"><input type="range" id="opacityRange" min="30" max="100" step="5" /><span class="range-val" id="opacityVal"></span></div>
+        </div>
+        <div><button type="button" class="secondary" id="badgeResetBtn">Reset to defaults</button></div>
+      </div>
+    </section>
+
     <section class="panel" id="panel-config">
       <p class="section-desc">This is the running order Stremio will use. Drag the handle, or use the arrows, to rearrange. Only checked rows are added.</p>
       <div class="catalog-list" id="catalogList"></div>
       <div class="badge-card">
-        <label class="badge-toggle"><input type="checkbox" id="badgesEnabled" /> Show TMDB rating badge on posters</label>
-        <p class="hint">Draws a small star-and-score badge in the top-right of each poster. Posters are then served through this addon rather than straight from TMDB, so this is off by default.</p>
+        <span class="badge-status" id="badgeStatus"></span>
+        <button type="button" class="text" id="editBadgesBtn">Edit in Badges tab</button>
       </div>
       <button id="generateBtn">Generate install link</button>
       <div class="error" id="configError"></div>
@@ -652,7 +716,7 @@
     <footer class="page-footer">
       <a href="https://github.com/WinterSU-V/Synchronous-PublicMetaDB" target="_blank" rel="noopener">View source on GitHub</a>
       <a href="https://ko-fi.com/iwintersuv" target="_blank" rel="noopener">Support on Ko-fi</a>
-      <span class="footer-version">v1.2.10</span>
+      <span class="footer-version">v1.3.0</span>
     </footer>
     <p class="tmdb-attribution">
      <img src="/tmdb-logo.svg" alt="TMDB" class="tmdb-logo" />
@@ -1262,6 +1326,102 @@ function badgeSettings() {
   return { enabled: true, base: location.origin, ...badgeStyle };
 }
 
+/* ======================= Badges tab ======================= */
+const BADGE_DEFAULTS = { pos: 'tr', size: 12, opacity: 90, shape: 'pill' };
+const BADGE_SAMPLE_RATINGS = ['8.4', '7.1', '6.3'];
+const BADGE_POS_NAMES = { tl: 'top-left', tc: 'top-centre', tr: 'top-right', bl: 'bottom-left', bc: 'bottom-centre', br: 'bottom-right' };
+let badgePreviewTimer = null;
+let badgeRetryTimer = null;
+
+function badgesOn() { return document.getElementById('badgesEnabled').checked; }
+
+// A few real posters from the user's own lists (already loaded for the Lists tab).
+function badgeSamplePosters() {
+  const out = [];
+  for (const id of Object.keys(previewCache)) {
+    for (const it of previewCache[id].items || []) {
+      if (it.poster && !out.includes(it.poster)) out.push(it.poster);
+      if (out.length >= 3) return out;
+    }
+  }
+  return out;
+}
+
+function updateBadgeStatus() {
+  document.getElementById('badgeStatus').textContent = badgesOn()
+    ? `Poster badges: on (${BADGE_POS_NAMES[badgeStyle.pos] || badgeStyle.pos}, ${badgeStyle.shape})`
+    : 'Poster badges: off';
+}
+
+function renderBadgeControls() {
+  document.querySelectorAll('#posPicker button').forEach(b => b.classList.toggle('on', b.dataset.pos === badgeStyle.pos));
+  document.querySelectorAll('#shapePicker button').forEach(b => b.classList.toggle('on', b.dataset.shape === badgeStyle.shape));
+  document.getElementById('sizeRange').value = badgeStyle.size;
+  document.getElementById('sizeVal').textContent = badgeStyle.size;
+  document.getElementById('opacityRange').value = badgeStyle.opacity;
+  document.getElementById('opacityVal').textContent = badgeStyle.opacity + '%';
+  document.getElementById('badgeControls').classList.toggle('disabled', !badgesOn());
+  updateBadgeStatus();
+}
+
+function badgeImgSrc(posterUrl, i) {
+  if (!badgesOn()) return posterUrl;
+  const file = posterUrl.split('/').pop();
+  return `/badge/${file}?r=${BADGE_SAMPLE_RATINGS[i]}&p=${badgeStyle.pos}&s=${badgeStyle.size}&o=${badgeStyle.opacity}&h=${badgeStyle.shape}`;
+}
+
+function renderBadgePreview() {
+  clearTimeout(badgeRetryTimer);
+  const box = document.getElementById('badgePreview');
+  const posters = badgeSamplePosters();
+  if (posters.length === 0) {
+    box.innerHTML = '<p class="hint">Your posters are still loading…</p>';
+    badgeRetryTimer = setTimeout(() => {
+      if (document.getElementById('panel-badges').classList.contains('active')) renderBadgePreview();
+    }, 1500);
+    return;
+  }
+  if (box.querySelectorAll('img').length !== posters.length) {
+    box.innerHTML = posters.map(() => '<div class="bp"><img alt="" /></div>').join('');
+  }
+  box.querySelectorAll('img').forEach((img, i) => {
+    const src = badgeImgSrc(posters[i], i);
+    // Load off-screen first so the previous preview stays visible until the new one is ready.
+    const loader = new Image();
+    loader.onload = () => { img.src = src; };
+    loader.onerror = () => { img.src = posters[i]; };
+    loader.src = src;
+  });
+}
+
+function schedulePreview() {
+  clearTimeout(badgePreviewTimer);
+  badgePreviewTimer = setTimeout(renderBadgePreview, 220);
+}
+
+function setBadgeStyle(patch) {
+  Object.assign(badgeStyle, patch);
+  renderBadgeControls();
+  schedulePreview();
+}
+
+// Used when restoring from an install link.
+function applyBadgeSettings(b) {
+  document.getElementById('badgesEnabled').checked = !!b.enabled;
+  ['pos', 'size', 'opacity', 'shape'].forEach(k => { if (b[k] != null) badgeStyle[k] = b[k]; });
+  renderBadgeControls();
+}
+
+document.getElementById('badgesEnabled').addEventListener('change', () => { renderBadgeControls(); schedulePreview(); });
+document.querySelectorAll('#posPicker button').forEach(b => b.addEventListener('click', () => setBadgeStyle({ pos: b.dataset.pos })));
+document.querySelectorAll('#shapePicker button').forEach(b => b.addEventListener('click', () => setBadgeStyle({ shape: b.dataset.shape })));
+document.getElementById('sizeRange').addEventListener('input', (e) => setBadgeStyle({ size: Number(e.target.value) }));
+document.getElementById('opacityRange').addEventListener('input', (e) => setBadgeStyle({ opacity: Number(e.target.value) }));
+document.getElementById('badgeResetBtn').addEventListener('click', () => setBadgeStyle({ ...BADGE_DEFAULTS }));
+document.getElementById('editBadgesBtn').addEventListener('click', () => document.querySelector('.tab-btn[data-tab="badges"]').click());
+document.querySelector('.tab-btn[data-tab="badges"]').addEventListener('click', () => { renderBadgeControls(); renderBadgePreview(); });
+renderBadgeControls();
+
 document.getElementById('generateBtn').addEventListener('click', async () => {
   const errEl = document.getElementById('configError');
   const btn = document.getElementById('generateBtn');
@@ -1330,12 +1490,7 @@ if (window.__PRELOADED_CONFIG__) {
     // but treats every entry as unchecked, and lists that were deselected
     // can reappear checked via their fresh defaults.
     items.forEach(i => { i.checked = selectedIds.has(i.id); });
-    if (preloaded.badges) {
-      document.getElementById('badgesEnabled').checked = !!preloaded.badges.enabled;
-      ['pos', 'size', 'opacity', 'shape'].forEach(k => {
-        if (preloaded.badges[k] != null) badgeStyle[k] = preloaded.badges[k];
-      });
-    }
+    if (preloaded.badges) applyBadgeSettings(preloaded.badges);
     renderConfigTab();
   });
 }

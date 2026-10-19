@@ -33,7 +33,7 @@ const TMDB_IMG = 'https://image.tmdb.org/t/p/w500';
 // Validating strictly also means this can only ever fetch from TMDB's CDN.
 const FILE_RE = /^[A-Za-z0-9_-]{8,80}\.(jpg|jpeg|png)$/;
 
-const POSITIONS = ['tl', 'tr', 'bl', 'br'];
+const POSITIONS = ['tl', 'tc', 'tr', 'bl', 'bc', 'br']; // top/bottom x left/centre/right
 const SHAPES = ['pill', 'rounded', 'square', 'circle'];
 // Top-right by default: Stremio draws its own "watched" tick at the
 // top-left of posters and a progress bar along the bottom of in-progress ones.
@@ -154,8 +154,9 @@ async function compose(posterBuf, rating, rawStyle) {
   const { svg, widthPx, heightPx } = badgeSvg(ratingText, style, pw);
 
   const m = Math.round(pw * 0.035);
-  const left = style.pos.endsWith('l') ? m : Math.max(0, pw - widthPx - m);
-  const top = style.pos.startsWith('t') ? m : Math.max(0, ph - heightPx - m);
+  const horiz = style.pos[1]; // 'l' | 'c' | 'r'
+  const left = horiz === 'l' ? m : horiz === 'c' ? Math.max(0, Math.round((pw - widthPx) / 2)) : Math.max(0, pw - widthPx - m);
+  const top = style.pos[0] === 't' ? m : Math.max(0, ph - heightPx - m);
 
   return sharp(posterBuf)
     .composite([{ input: Buffer.from(svg), left, top }])

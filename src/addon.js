@@ -3,7 +3,7 @@ const tmdb = require('./tmdb');
 const badge = require('./badge');
 
 const ADDON_ID = 'com.publicmetadb.stremio';
-const ADDON_VERSION = '1.2.10';
+const ADDON_VERSION = '1.3.0';
 const LOGO_URL = 'https://raw.githubusercontent.com/WinterSU-V/Synchronous-PublicMetaDB/main/public/icon.png';
 
 // Every logical catalog (continue-watching / watchlist / list:xxx) becomes

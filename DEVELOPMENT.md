@@ -158,3 +158,21 @@ the same year.
 `ADDON_VERSION` in `src/addon.js` is a manual field — Stremio doesn't
 auto-detect new builds, so bump it when you want existing installs to
 notice a meaningfully new version.
+
+## Beamup: deploy by pushing to `main`
+
+Beamup's server (Dokku) now deploys from `main`, but `beamup-cli` still pushes `HEAD:master`. The push is accepted, the CLI prints "command finished successfully", and nothing is deployed. The tell is `WARNING: deploy did not complete, you must push to main` in its output. Deploy with:
+
+    git push beamup HEAD:main
+
+and confirm against the live site afterwards (e.g. `/badge-status`, `/manifest.json`) rather than trusting the CLI's summary.
+
+## Poster rating badges
+
+Optional, off by default, set per install link (stored in the config token as `badges`).
+
+- Stremio's catalog format only takes a poster URL, so when enabled, catalog posters point at `/badge/<tmdb-poster-file>?r=7.8&p=tr&s=12&o=90&h=pill` on this server. It fetches the poster from TMDB's image CDN, draws the badge with `sharp`, and returns a JPEG (`src/badge.js`).
+- Stateless: file name, rating and style are all in the URL, so a changed rating or style is automatically a new image. Only validated TMDB file names are fetched, style values are clamped, composed images sit in a 400-entry in-memory cache, at most 3 are drawn at once, and any failure redirects to the plain TMDB poster.
+- `sharp` is an optional dependency. If it can't install on a host, `/badge-status` reports `{"available":false}` and catalogs keep their normal posters. Digits are drawn as vector paths rather than text, so rendering doesn't depend on installed fonts.
+- Titles with no TMDB votes get no badge. Position choices exist because apps draw their own overlays (Stremio's watched tick is top-left, Nuvio's top-right).
+- Not yet carried in exported `.pmdbkeys` files. Restoring from an install link does bring the settings back.
