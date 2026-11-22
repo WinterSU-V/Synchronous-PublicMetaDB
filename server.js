@@ -9,6 +9,7 @@ const pmdb = require('./src/pmdb');
 const lists = require('./src/lists');
 const tmdb = require('./src/tmdb');
 const badge = require('./src/badge');
+const scrobble = require('./src/scrobble');
 
 const app = express();
 app.set('trust proxy', true);
@@ -88,12 +89,12 @@ app.post('/api/preview', async (req, res) => {
 });
 
 app.post('/api/build-config', (req, res) => {
-  const { pmdbKey, tmdbKey, catalogs, badges } = req.body || {};
+  const { pmdbKey, tmdbKey, catalogs, badges, scrobble: scrobbleOn } = req.body || {};
   const cleanBadges = badge.sanitizeSettings(badges);
   if (!pmdbKey || !tmdbKey || !Array.isArray(catalogs)) {
     return res.status(400).json({ error: 'pmdbKey, tmdbKey, and catalogs are required' });
   }
-  const config = encodeConfig({ pmdbKey, tmdbKey, catalogs, ...(cleanBadges ? { badges: cleanBadges } : {}) });
+  const config = encodeConfig({ pmdbKey, tmdbKey, catalogs, ...(cleanBadges ? { badges: cleanBadges } : {}), ...(scrobbleOn === true ? { scrobble: { enabled: true } } : {}) });
   res.json({ config });
 });
 
@@ -101,6 +102,11 @@ app.post('/api/build-config', (req, res) => {
 app.get('/badge/:file', badge.handle);
 // Lets you check from outside whether the optional image library installed on this host.
 app.get('/badge-status', (req, res) => res.json({ available: badge.isAvailable() }));
+
+// Watch-state sync (see src/scrobble.js): player events carry progress; a subtitles request is the fallback for apps that send none.
+app.get('/:config/subtitles/:type/:id/:extra.json', requireConfig, scrobble.handleSubtitles);
+app.get('/:config/subtitles/:type/:id.json', requireConfig, scrobble.handleSubtitles);
+app.get('/:config/player/:type/:id/:extra.json', requireConfig, scrobble.handlePlayer);
 
 // ---- Stremio addon protocol ------------------------------------------
 
@@ -123,6 +129,7 @@ app.get('/manifest.json', async (req, res) => {
 app.get('/:config/manifest.json', requireConfig, async (req, res) => {
   try {
     const manifest = await buildManifest(req.pmdbConfig);
+    scrobble.decorateManifest(manifest, req.pmdbConfig);
     res.json(manifest);
   } catch (e) {
     console.error(e);

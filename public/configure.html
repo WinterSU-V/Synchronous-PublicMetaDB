@@ -579,6 +579,8 @@
   .bp { width: 30%; max-width: 150px; aspect-ratio: 2 / 3; border-radius: 8px; overflow: hidden; background: var(--surface-raised); }
   .bp img { width: 100%; height: 100%; object-fit: cover; display: block; }
 
+  .scrobble-card { margin-top: 12px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; }
+
   @media (prefers-reduced-motion: reduce) {
     * { animation: none !important; transition: none !important; }
   }
@@ -700,6 +702,10 @@
       <div class="badge-card">
         <span class="badge-status" id="badgeStatus"></span>
         <button type="button" class="text" id="editBadgesBtn">Edit in Badges tab</button>
+      </div>
+      <div class="scrobble-card">
+        <label class="badge-toggle"><input type="checkbox" id="scrobbleEnabled" checked /> Sync watch progress to PublicMetaDB</label>
+        <p class="hint">Stremio sends this addon your playback activity (play, pause, stop), so PublicMetaDB gets your progress and marks a title watched when you finish it. Stremio asks you to confirm this when you install. Apps that don't send playback activity, such as Nuvio, mark a title watched when playback starts instead. On by default for new install links; untick to turn it off. Links you created earlier are unchanged.</p>
       </div>
       <button id="generateBtn">Generate install link</button>
       <div class="error" id="configError"></div>
@@ -1422,6 +1428,11 @@ document.getElementById('editBadgesBtn').addEventListener('click', () => documen
 document.querySelector('.tab-btn[data-tab="badges"]').addEventListener('click', () => { renderBadgeControls(); renderBadgePreview(); });
 renderBadgeControls();
 
+// Opt-in: mark titles as watched in PublicMetaDB when an app starts playback (see src/scrobble.js).
+function scrobbleOn() {
+  return document.getElementById('scrobbleEnabled').checked;
+}
+
 document.getElementById('generateBtn').addEventListener('click', async () => {
   const errEl = document.getElementById('configError');
   const btn = document.getElementById('generateBtn');
@@ -1445,7 +1456,7 @@ document.getElementById('generateBtn').addEventListener('click', async () => {
     const data = await fetchJson('/api/build-config', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ pmdbKey: keys.pmdbKey, tmdbKey: keys.tmdbKey, catalogs, badges: badgeSettings() })
+      body: JSON.stringify({ pmdbKey: keys.pmdbKey, tmdbKey: keys.tmdbKey, catalogs, badges: badgeSettings(), scrobble: scrobbleOn() })
     });
 
     const manifestUrl = `${location.origin}/${data.config}/manifest.json`;
@@ -1491,6 +1502,7 @@ if (window.__PRELOADED_CONFIG__) {
     // can reappear checked via their fresh defaults.
     items.forEach(i => { i.checked = selectedIds.has(i.id); });
     if (preloaded.badges) applyBadgeSettings(preloaded.badges);
+    document.getElementById('scrobbleEnabled').checked = !!(preloaded.scrobble && preloaded.scrobble.enabled);
     renderConfigTab();
   });
 }
