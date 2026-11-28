@@ -10,6 +10,7 @@ const lists = require('./src/lists');
 const tmdb = require('./src/tmdb');
 const badge = require('./src/badge');
 const scrobble = require('./src/scrobble');
+const observeLibrary = require('./src/observe-library');
 
 const app = express();
 app.set('trust proxy', true);
@@ -107,6 +108,8 @@ app.get('/badge-status', (req, res) => res.json({ available: badge.isAvailable()
 app.get('/:config/subtitles/:type/:id/:extra.json', requireConfig, scrobble.handleSubtitles);
 app.get('/:config/subtitles/:type/:id.json', requireConfig, scrobble.handleSubtitles);
 app.get('/:config/player/:type/:id/:extra.json', requireConfig, scrobble.handlePlayer);
+app.get('/:config/library/:type/:id/:extra.json', requireConfig, observeLibrary.handleLibrary);
+app.get('/:config/library/:type/:id.json', requireConfig, observeLibrary.handleLibrary);
 
 // ---- Stremio addon protocol ------------------------------------------
 
@@ -130,6 +133,7 @@ app.get('/:config/manifest.json', requireConfig, async (req, res) => {
   try {
     const manifest = await buildManifest(req.pmdbConfig);
     scrobble.decorateManifest(manifest, req.pmdbConfig);
+    observeLibrary.decorateManifest(manifest);
     res.json(manifest);
   } catch (e) {
     console.error(e);
@@ -146,6 +150,9 @@ app.get('/:config/catalog/:type/:id.json', requireConfig, async (req, res) => {
     res.status(500).json({ metas: [] });
   }
 });
+
+// Experiment (OBSERVE_LIBRARY=1): log requests nothing else answered. Silent otherwise.
+app.use(observeLibrary.logUnmatched);
 
 app.listen(PORT, () => {
   console.log(`PublicMetaDB Stremio addon running at http://127.0.0.1:${PORT}`);

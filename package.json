@@ -1,10 +1,11 @@
 {
   "name": "pmdb-stremio-addon",
-  "version": "2.5.9",
+  "version": "1.4.1",
   "description": "Stremio addon backed by PublicMetaDB: Continue Watching, Watchlist, and custom lists",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "bump": "node scripts/bump-version.js"
   },
   "engines": {
     "node": ">=18"
